@@ -83,9 +83,6 @@ class InterpolatedConv2d(tf.keras.layers.Layer):
                                                    self.kernel_positions.shape[1], 1])
 
     def call(self, input):
-        self.kernel_var = tf.convert_to_tensor(
-            np.array([[[5], [10], [20], [5]], [[5], [10], [20], [5]]]), dtype=tf.float32)
-
         full_kernel = _spline_interpolate_kernel_layer(self.kernel_positions,
                                                        self.kernel_var,
                                                        kernel_size=4,
