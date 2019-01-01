@@ -26,11 +26,12 @@ Currently, this implementation is especially suitable for:
 | |Our solution|Dilated Kernels|Conventional Kernels
 -----|-----|-----|-----
 Speed|Fast -> Faster [1]|Faster|Slow
-\# Parameters|Fewer|Few|Many
+\# Parameters|Fewest|Few|Many
 Window size|Large|Large|Small
 Effective Density|Dense|Sparse|Dense
 A priori knowledge| Flexible | Some | Limited
 
+[1]: Depending on the regularity of the data, our solution can be just as fast if not faster than dilated kernels. 
 
 ## Installation
 TK
