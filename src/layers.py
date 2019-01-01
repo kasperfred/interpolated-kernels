@@ -10,7 +10,7 @@ def _spline_interpolate_kernel_layer(kernel_positions, kernel_values, kernel_siz
     """
     if not cont3d:
         raise NotImplementedError(
-            "Discrete channels interpolation is currently not implemented")
+            "Discrete channel interpolation is currently not implemented")
 
     # required for interpolation to work.
     # float32 because the spline is continous
@@ -40,7 +40,7 @@ def _spline_interpolate_kernel_layer(kernel_positions, kernel_values, kernel_siz
         # we can do this by segmenting the kernel_position layers
         kernel = None
         raise NotImplementedError(
-            "Discrete channels interpolation is currently not implemented")
+            "Discrete channel interpolation is currently not implemented")
 
     return tf.reshape(kernel, [batch_size, kernel_size, kernel_size, channels])
     return kernel
