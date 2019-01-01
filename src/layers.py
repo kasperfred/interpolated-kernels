@@ -8,7 +8,6 @@ def _spline_interpolate_kernel_layer(kernel_positions, kernel_values, kernel_siz
     kernel_size: (int) size of kernel (assumes square)
     order: (int) order to use during spline interpolation
     """
-
     if not cont3d:
         raise NotImplementedError(
             "Discrete channels interpolation is currently not implemented")
@@ -74,8 +73,6 @@ class InterpolatedConv2d(tf.keras.layers.Layer):
 
     def build(self, input_shape):
         # Inputshape assumes: NHWC
-
-
         self.channels = input_shape[3]
         self.n_filters = self.kernel_positions.shape[0]
 
