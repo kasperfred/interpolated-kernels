@@ -79,4 +79,4 @@ TK: `op` mode.
 TK: change interpolation engine.
 
 ## Acknowledgements
-This project wouldn't have been possible without support from the [Hammer research group](http://users-phys.au.dk/hammer/).
+This project wouldn't have been possible without support from [Hammer research group](http://users-phys.au.dk/hammer/).
