@@ -1,6 +1,7 @@
 # Interpolated Kernels
 
-> NOTE: This project is work in progress. While the base modules are created, 
+> NOTE: This project is work in progress.
+> Progress is currently limited due to upcoming exam season. 
 
 This project is an attempt to create an efficient convolutional kernel with a large dense window size for very high resolution inputs.
 
