@@ -74,6 +74,15 @@ img_tensor = tf.ones([5, 11, 11, 3])
 v = layer(img_tensor)
 ```
 
+If `channels == 1`, then omit the channels dimension
+```
+kernel_coordinates = [
+    [0,0], # [height, width] coordinates
+    [1,1],
+    [2,2],
+]
+```
+
 
 TK: `op` mode.
 
