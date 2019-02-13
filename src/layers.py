@@ -53,7 +53,8 @@ class InterpolatedConv2d(tf.keras.layers.Layer):
                  strides=(1, 1, 1, 1),
                  padding="SAME",
                  order=1,
-                 continous_3d=True):
+                 continous_3d=True,
+                 **kwargs):
         """
         Input Shape assumes NHWC
 
@@ -62,7 +63,7 @@ class InterpolatedConv2d(tf.keras.layers.Layer):
             - useful for modelling continous spaces such as energy landscapes
             - theoretically less useful for color channels in images.
         """
-        super(InterpolatedConv2d, self).__init__()
+        super(InterpolatedConv2d, self).__init__(**kwargs)
         self.kernel_positions = kernel_positions
         self.kernel_size = kernel_size
         self.cont3d = continous_3d
