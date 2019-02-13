@@ -16,7 +16,8 @@ def _spline_interpolate_kernel_layer(kernel_positions, kernel_values, kernel_siz
     # float32 because the spline is continous
     kernel_positions = tf.convert_to_tensor(kernel_positions, dtype=tf.float32)
 
-    batch_size = kernel_positions.shape[0]
+    if kernel_positions.shape[2] == 3 and channels == 1:
+        raise ValueError("You should omit the channels dimension from your kernel positions if you only have 1 channel.")
 
     # all positions in the interpolated kernel
     # TODO: Implement this in tensorflow
@@ -42,8 +43,7 @@ def _spline_interpolate_kernel_layer(kernel_positions, kernel_values, kernel_siz
         raise NotImplementedError(
             "Discrete channel interpolation is currently not implemented")
 
-    return tf.reshape(kernel, [batch_size, kernel_size, kernel_size, channels])
-    return kernel
+    return tf.reshape(kernel, [n_filters, kernel_size, kernel_size, channels])
 
 
 class InterpolatedConv2d(tf.keras.layers.Layer):
@@ -86,8 +86,8 @@ class InterpolatedConv2d(tf.keras.layers.Layer):
     def call(self, input):
         full_kernel = _spline_interpolate_kernel_layer(self.kernel_positions,
                                                        self.kernel_var,
-                                                       kernel_size=4,
-                                                       channels=3,
+                                                       kernel_size=self.kernel_size,
+                                                       channels=self.channels,
                                                        cont3d=self.cont3d)
 
         shape = [full_kernel.shape[1], full_kernel.shape[2],
