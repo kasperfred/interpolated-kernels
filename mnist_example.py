@@ -1,3 +1,5 @@
+from src.utils import symmetric_filters
+from src.layers import InterpolatedConv2d
 import tensorflow.keras as keras
 from tensorflow.keras.datasets import mnist
 from tensorflow.keras.models import Sequential
@@ -7,6 +9,12 @@ from tensorflow.keras import backend as K
 import tensorflow as tf
 import numpy as np
 from timer import Timer
+import os
+import pickle
+
+# debug
+verbose = True
+run_version = 0
 
 # params
 batch_size = 128
@@ -14,19 +22,23 @@ epochs = 12
 im_size = 28
 
 # kernel params
-kernel_size = 3 # effective
+kernel_size = 3  # effective
 kernel_positions = np.array([
-    # h w 
-    [0,0],
-    [2,0],
-    [0,2],
-    [2,2]
+    # h w
+    [0, 0],
+    [2, 0],
+    [1,1],
+    [0, 2],
+    [2, 2]
 ])
 
 # computed:
 input_shape = (im_size, im_size, 1)
+run_name = f"run-i{im_size}-k{kernel_size}-v{run_version}"
 
 # the data, split between train and test sets
+
+
 def get_data(size=28):
     (x_train, y_train), (x_test, y_test) = mnist.load_data()
 
@@ -36,16 +48,16 @@ def get_data(size=28):
     if not size == 28:
         x_train = tf.image.resize_images(
             x_train,
-            (size,size),
+            (size, size),
             method=tf.image.ResizeMethod.BILINEAR,
         )
 
         x_test = tf.image.resize_images(
             x_test,
-            (size,size),
+            (size, size),
             method=tf.image.ResizeMethod.BILINEAR,
         )
-    
+
     x_train = x_train.astype('float32')
     x_test = x_test.astype('float32')
     x_train /= 255
@@ -57,18 +69,20 @@ def get_data(size=28):
 
     return (x_train, y_train), (x_test, y_test)
 
+
 (x_train, y_train), (x_test, y_test) = get_data(im_size)
 
 print('x_train shape:', x_train.shape)
 print(x_train.shape[0], 'train samples')
 print(x_test.shape[0], 'test samples')
 
+
 def build_baseline(input_shape, kernel_size, compile=True, *args, **kwargs):
     model = Sequential()
     model.add(Conv2D(32, kernel_size=(kernel_size, kernel_size),
-                    activation='linear',
-                    use_bias=None,
-                    input_shape=input_shape))
+                     activation='linear',
+                     use_bias=None,
+                     input_shape=input_shape))
     model.add(tf.keras.layers.Lambda(lambda x: tf.nn.relu(x)))
 
     # model.add(Conv2D(64, (3, 3), activation='linear', use_bias=None))
@@ -83,19 +97,17 @@ def build_baseline(input_shape, kernel_size, compile=True, *args, **kwargs):
 
     if compile:
         model.compile(loss=keras.losses.categorical_crossentropy,
-                    optimizer=keras.optimizers.Adadelta(),
-                    metrics=['accuracy'])
-    
+                      optimizer=keras.optimizers.Adadelta(),
+                      metrics=['accuracy'])
+
     return model
 
 
-from src.layers import InterpolatedConv2d
-from src.utils import symmetric_filters
 def build_interpolated(input_shape, kernel_size, kernel_positions, compile=True, *args, **kwargs):
     model = Sequential()
 
     kcs = symmetric_filters(kernel_positions, 32)
-    model.add(InterpolatedConv2d(kcs,kernel_size, input_shape=[28,28,1]))
+    model.add(InterpolatedConv2d(kcs, kernel_size, input_shape=[28, 28, 1]))
 
     model.add(tf.keras.layers.Lambda(lambda x: tf.nn.relu(x)))
 
@@ -112,22 +124,23 @@ def build_interpolated(input_shape, kernel_size, kernel_positions, compile=True,
 
     if compile:
         model.compile(loss=keras.losses.categorical_crossentropy,
-                    optimizer=keras.optimizers.Adadelta(),
-                    metrics=['accuracy'])
-    
+                      optimizer=keras.optimizers.Adadelta(),
+                      metrics=['accuracy'])
+
     return model
 
 
 def run_model(model_build_function, name=None, verbose=True):
     """Trains the model
-    
+
     Assumes `x_train`,`x_test`,`y_train`,`y_test` exist in global scope.
+    Assumes params exist in global scope.
 
     Args:
         model_build_function (callable): A function that returns a compiled model
         name (str, optional): Defaults to None. name of model
         verbose (bool, optional): Defaults to True. to spam or not to spam console
-    
+
     Returns:
         dict: metrics
     """
@@ -136,25 +149,26 @@ def run_model(model_build_function, name=None, verbose=True):
         name = model_build_function.__str__()
 
     # run model
-    model = build_baseline(input_shape, kernel_size=kernel_size, kernel_positions=kernel_positions, compile=True)
+    model = build_baseline(input_shape, kernel_size=kernel_size,
+                           kernel_positions=kernel_positions, compile=True)
 
     t = Timer().start()
     hist = model.fit(x_train, y_train,
-            batch_size=batch_size,
-            epochs=epochs,
-            verbose=1,
-            validation_data=(x_test, y_test))
+                     batch_size=batch_size,
+                     epochs=epochs,
+                     verbose=1,
+                     validation_data=(x_test, y_test))
     t.stop()
 
     score = model.evaluate(x_test, y_test, verbose=0)
 
     if verbose:
-        print (name)
+        print(name)
         print('Test loss:', score[0])
         print('Test accuracy:', score[1])
         print('Time:', t.delta)
-        print (model.summary())
-    
+        print(model.summary())
+
     return {
         "name": name,
         "training_hist": hist,
@@ -164,4 +178,26 @@ def run_model(model_build_function, name=None, verbose=True):
     }
 
 
+def save_run(res_dict: dict, path: str=None):
+    if not path:
+        fname = res_dict["name"] + ".res.pkl"
 
+        directory = os.path.join("results",run_name)
+
+        # create directories
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        path = os.path.join(directory, fname)
+    
+
+    # save data
+    with open(path, 'wb') as f:
+        pickle.dump(res_dict, f)
+
+    return 0
+
+
+# run models
+res_dict_baseline = run_model(build_baseline, "Baseline", verbose)
+res_dict_interpolated = run_model(build_interpolated, "Interpolated", verbose)
