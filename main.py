@@ -12,12 +12,14 @@ mnist = tf.keras.datasets.mnist
 x_train, x_test = x_train / 255.0, x_test / 255.0
 
 # resize
-x_train, x_test = [tf.expand_dims(x, 3) for x in [x_train, x_test]]
+x_train = tf.expand_dims(x_train, 3)
+x_test = tf.expand_dims(x_test, 3)
 
 # onehot
-y_train, y_test = map(tf.keras.utils.to_categorical, [y_train, y_test])
+y_train = tf.keras.utils.to_categorical(y_train)
+y_test = tf.keras.utils.to_categorical(y_test)
 
-
+print ("survived first wave")
 # def datagen(batch_size:int=256):
 #     # import data
 #     mnist = tf.keras.datasets.mnist
@@ -92,8 +94,8 @@ def get_model_interpolated():
 baseline = get_model_baseline([28,28,1], compile=True)
 
 baseline.fit(x_train, y_train,
-          steps_per_epoch=60000,
-          epochs=3,
+          steps_per_epoch=256,
+          epochs=300,
           verbose=1,
           validation_data=(x_test, y_test))
 # hist = baseline.fit_generator(dg, steps_per_epoch=200, epochs=3)
