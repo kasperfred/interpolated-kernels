@@ -22,7 +22,7 @@ run_version = 0
 
 # params
 batch_size = 128
-epochs = 6
+epochs = 3
 im_size = 28*4
 
 # kernel params
@@ -240,18 +240,22 @@ def run_model(model_build_function, name=None, verbose=True):
 
     score = model.evaluate(x_test, y_test, verbose=0)
 
+    conv_layer_weight = model.layers[0].weights[0]
+
     if verbose:
         print(name)
         print('Test loss:', score[0])
         print('Test accuracy:', score[1])
         print('Time:', t.delta)
         print(model.summary())
+        print(conv_layer_weight)
 
     return {
         "name": name,
         "training_time": t.delta,
         "test_loss": score[0],
-        "test_accuracy": score[1]
+        "test_accuracy": score[1],
+        "conv_layer_weight": conv_layer_weight
     }
 
 
@@ -278,12 +282,13 @@ def save_run(res_dict: dict, path: str=None):
 
 
 # run models
-# res_dict_baseline = run_model(build_baseline, "Baseline", verbose)
+res_dict_baseline = run_model(build_baseline, "Baseline", verbose)
 res_dict_interpolated = run_model(build_interpolated, "Interpolated", verbose)
 # res_dict_dilated = run_model(build_dilated, "Dilated", verbose)
 
 
+
 # save runs
-# save_run(res_dict_baseline)
+save_run(res_dict_baseline)
 save_run(res_dict_interpolated)
 # save_run(res_dict_dilated)
