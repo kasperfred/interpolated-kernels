@@ -53,7 +53,7 @@ run_version = 0
 
 # params
 batch_size = 128
-epochs = 12
+epochs = 6
 im_size = 28*4
 
 # kernel params
@@ -69,9 +69,6 @@ kernel_positions = np.array([
 ```
 
 ### Interpolated
-Test loss: 0.054805959406445615
-Test accuracy: 0.9833
-Time: 2679.18
 
 
 ### Baseline
@@ -91,7 +88,7 @@ run_version = 0
 
 # params
 batch_size = 128
-epochs = 12
+epochs = 6
 im_size = 28*4
 
 # kernel params
@@ -100,17 +97,20 @@ kernel_positions = np.array([
     # h w
     [0, 0],
     [2, 0],
-    [1,1],
+    [1, 1],
     [0, 2],
     [2, 2]
 ])
 ```
-
-
 ### Interpolated
 
 
+
 ### Baseline
+Test loss: 0.04826091565887182
+Test accuracy: 0.9847
+Time: 819.23
+Params: 4608
 
 ### Analysis
 
