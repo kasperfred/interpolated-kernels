@@ -17,13 +17,16 @@ import cv2
 verbose = True
 run_version = 0
 
+# disable GPU due to cuda handler not being able to register
+# os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+
 # params
 batch_size = 128
 epochs = 6
 im_size = 28*4
 
 # kernel params
-kernel_size = 3  # effective
+kernel_size = 3*4  # effective
 kernel_positions = np.array([
     # h w
     [0, 0],
