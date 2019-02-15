@@ -43,3 +43,106 @@ Param %:
 $$\frac{128\text{param}}{288\text{param}} \cdot 100\% = 44.5\%$$
 
 
+
+
+## 112x112 (x4) small view window 
+```
+# debug
+verbose = True
+run_version = 0
+
+# params
+batch_size = 128
+epochs = 12
+im_size = 28*4
+
+# kernel params
+kernel_size = 3  # effective
+kernel_positions = np.array([
+    # h w
+    [0, 0],
+    [2, 0],
+    [1, 1],
+    [0, 2],
+    [2, 2]
+])
+```
+
+### Interpolated
+Test loss: 0.054805959406445615
+Test accuracy: 0.9833
+Time: 2679.18
+
+
+### Baseline
+Test loss: 0.05651052088196157
+Test accuracy: 0.982
+Time: 1627.22
+
+### Analysis
+
+
+
+## 112x112 (x4) large window same number interp params
+```
+# debug
+verbose = True
+run_version = 0
+
+# params
+batch_size = 128
+epochs = 12
+im_size = 28*4
+
+# kernel params
+kernel_size = 3*4  # effective
+kernel_positions = np.array([
+    # h w
+    [0, 0],
+    [2, 0],
+    [1,1],
+    [0, 2],
+    [2, 2]
+])
+```
+
+
+### Interpolated
+
+
+### Baseline
+
+### Analysis
+
+
+
+## 112x112 (x4) large window same more params params
+```
+# debug
+verbose = True
+run_version = 0
+
+# params
+batch_size = 128
+epochs = 12
+im_size = 28*4
+
+# kernel params
+kernel_size = 3*4  # effective
+kernel_positions = np.array([
+    # h w
+    [0, 0],
+    [2, 0],
+    [1,1],
+    [0, 2],
+    [2, 2]
+])
+```
+
+
+### Interpolated
+
+
+### Baseline
+
+### Analysis
