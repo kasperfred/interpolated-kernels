@@ -69,12 +69,18 @@ kernel_positions = np.array([
 ```
 
 ### Interpolated
+Test loss: 0.0748734971286729
+Test accuracy: 0.9758
+Time: 627.02
 
+Params: 160
 
 ### Baseline
-Test loss: 0.05651052088196157
-Test accuracy: 0.982
-Time: 1627.22
+Test loss: 0.0648
+Test accuracy:  0.9796
+Time: 1458
+
+Params: 288
 
 ### Analysis
 
@@ -103,6 +109,8 @@ kernel_positions = np.array([
 ])
 ```
 ### Interpolated
+(no GPU)
+
 
 
 
