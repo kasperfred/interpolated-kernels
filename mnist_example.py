@@ -30,10 +30,21 @@ kernel_size = 3*4  # effective
 kernel_positions = np.array([
     # h w
     [0, 0],
-    [2, 0],
-    [1, 1],
-    [0, 2],
-    [2, 2]
+    [0,11],
+    [0,8],
+    [1, 5],
+    [3, 2],
+    [3, 9],
+    [5, 0],
+    [5,4],
+    [5,11],
+    [6,7],
+    [8,2],
+    [8,9],
+    [10,5],
+    [11,0],
+    [11,8],
+    [11,11]
 ])
 
 # computed:
@@ -130,7 +141,33 @@ def build_baseline(input_shape, kernel_size, compile=True, *args, **kwargs):
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Dropout(0.25))
     model.add(Flatten())
-    model.add(Dense(128, activation='relu'))
+    model.add(Dense(64, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(10, activation='softmax'))
+
+    if compile:
+        model.compile(loss=keras.losses.categorical_crossentropy,
+                      optimizer=keras.optimizers.Adadelta(),
+                      metrics=['accuracy'])
+
+    return model
+
+def build_dilated(input_shape, kernel_size, compile=True, *args, **kwargs):
+    model = Sequential()
+    model.add(Conv2D(32, kernel_size=(kernel_size, kernel_size),
+                     activation='linear',
+                     use_bias=None,
+                     dilation_rate=(2, 2),
+                     input_shape=input_shape))
+    model.add(tf.keras.layers.Lambda(lambda x: tf.nn.relu(x)))
+
+    # model.add(Conv2D(64, (3, 3), activation='linear', use_bias=None))
+    # model.add(tf.keras.layers.Lambda(lambda x: tf.nn.relu(x)))
+
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.25))
+    model.add(Flatten())
+    model.add(Dense(64, activation='relu'))
     model.add(Dropout(0.5))
     model.add(Dense(10, activation='softmax'))
 
@@ -157,7 +194,7 @@ def build_interpolated(input_shape, kernel_size, kernel_positions, compile=True,
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Dropout(0.25))
     model.add(Flatten())
-    model.add(Dense(128, activation='relu'))
+    model.add(Dense(64, activation='relu'))
     model.add(Dropout(0.5))
     model.add(Dense(10, activation='softmax'))
 
@@ -243,8 +280,10 @@ def save_run(res_dict: dict, path: str=None):
 # run models
 # res_dict_baseline = run_model(build_baseline, "Baseline", verbose)
 res_dict_interpolated = run_model(build_interpolated, "Interpolated", verbose)
+# res_dict_dilated = run_model(build_dilated, "Dilated", verbose)
 
 
 # save runs
 # save_run(res_dict_baseline)
 save_run(res_dict_interpolated)
+# save_run(res_dict_dilated)

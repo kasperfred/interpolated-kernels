@@ -109,9 +109,32 @@ kernel_positions = np.array([
 ])
 ```
 ### Interpolated
-(no GPU)
+CUDA handler acting weird. Don't trust relative time. 
+
+Test loss: 0.07425058183657166
+Test accuracy: 0.9785
+Time: 1423.06
+
+Params: 160
 
 
+## Interpolated fixed indices
+CUDA handler acting weird. Don't trust relative time. 
+```
+kernel_positions = np.array([
+    # h w
+    [0, 0],
+    [11, 0],
+    [5, 5],
+    [0, 11],
+    [11, 11]
+])
+```
+Test loss: 0.05556277578609297
+Test accuracy: 0.9817
+Time: 1422.66
+
+Params: 160
 
 
 ### Baseline
@@ -120,7 +143,13 @@ Test accuracy: 0.9847
 Time: 819.23
 Params: 4608
 
-### Analysis
+### Dilated
+
+Test loss: 0.03538157455020464
+Test accuracy: 0.9881
+Time: 568.97
+
+Params 4608
 
 
 
@@ -128,11 +157,14 @@ Params: 4608
 ```
 # debug
 verbose = True
-run_version = 0
+run_version = 1
+
+# disable GPU due to cuda handler not being able to register
+# os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
 # params
 batch_size = 128
-epochs = 12
+epochs = 6
 im_size = 28*4
 
 # kernel params
@@ -140,17 +172,28 @@ kernel_size = 3*4  # effective
 kernel_positions = np.array([
     # h w
     [0, 0],
-    [2, 0],
-    [1,1],
-    [0, 2],
-    [2, 2]
+    [0,11],
+    [0,8]
+    [1, 5],
+    [3, 2],
+    [3, 9],
+    [5, 0],
+    [5,4],
+    [5,11],
+    [6,7],
+    [8,2],
+    [8,9],
+    [10,5],
+    [11,0],
+    [11,8],
+    [11,11]
 ])
 ```
 
 
 ### Interpolated
+Test loss: 0.054953625461518094
+Test accuracy: 0.9836
+Time: 584.77
 
-
-### Baseline
-
-### Analysis
+Params: 512
