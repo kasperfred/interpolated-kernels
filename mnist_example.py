@@ -19,7 +19,7 @@ run_version = 0
 # params
 batch_size = 128
 epochs = 12
-im_size = 28
+im_size = 28*4
 
 # kernel params
 kernel_size = 3  # effective
@@ -36,14 +36,12 @@ kernel_positions = np.array([
 input_shape = (im_size, im_size, 1)
 run_name = f"run-i{im_size}-k{kernel_size}-v{run_version}"
 
-# the data, split between train and test sets
-
 
 def get_data(size=28):
     (x_train, y_train), (x_test, y_test) = mnist.load_data()
 
-    x_train = x_train.reshape(x_train.shape[0], size, size, 1)
-    x_test = x_test.reshape(x_test.shape[0], size, size, 1)
+    x_train = x_train.reshape(x_train.shape[0], 28, 28, 1)
+    x_test = x_test.reshape(x_test.shape[0], 28, 28, 1)
 
     if not size == 28:
         x_train = tf.image.resize_images(
@@ -56,10 +54,8 @@ def get_data(size=28):
             x_test,
             (size, size),
             method=tf.image.ResizeMethod.BILINEAR,
-        )
+        )    
 
-    x_train = x_train.astype('float32')
-    x_test = x_test.astype('float32')
     x_train /= 255
     x_test /= 255
 
@@ -72,10 +68,10 @@ def get_data(size=28):
 
 (x_train, y_train), (x_test, y_test) = get_data(im_size)
 
-print('x_train shape:', x_train.shape)
-print(x_train.shape[0], 'train samples')
-print(x_test.shape[0], 'test samples')
-
+if verbose:
+    print('x_train shape:', x_train.shape)
+    print(x_train.shape[0], 'train samples')
+    print(x_test.shape[0], 'test samples')
 
 def build_baseline(input_shape, kernel_size, compile=True, *args, **kwargs):
     model = Sequential()
@@ -201,3 +197,8 @@ def save_run(res_dict: dict, path: str=None):
 # run models
 res_dict_baseline = run_model(build_baseline, "Baseline", verbose)
 res_dict_interpolated = run_model(build_interpolated, "Interpolated", verbose)
+
+
+# save runs
+save_run(res_dict_baseline)
+save_run(res_dict_interpolated)
