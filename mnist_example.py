@@ -23,7 +23,7 @@ epochs = 6
 im_size = 28*4
 
 # kernel params
-kernel_size = 3*4  # effective
+kernel_size = 3  # effective
 kernel_positions = np.array([
     # h w
     [0, 0],
@@ -143,7 +143,7 @@ def build_interpolated(input_shape, kernel_size, kernel_positions, compile=True,
     model = Sequential()
 
     kcs = symmetric_filters(kernel_positions, 32)
-    model.add(InterpolatedConv2d(kcs, kernel_size, input_shape=[28, 28, 1]))
+    model.add(InterpolatedConv2d(kcs, kernel_size, input_shape=input_shape))
 
     model.add(tf.keras.layers.Lambda(lambda x: tf.nn.relu(x)))
 
@@ -185,7 +185,7 @@ def run_model(model_build_function, name=None, verbose=True):
         name = model_build_function.__str__()
 
     # run model
-    model = build_baseline(input_shape, kernel_size=kernel_size,
+    model = model_build_function(input_shape, kernel_size=kernel_size,
                            kernel_positions=kernel_positions, compile=True)
 
     verbose_fixed = 1 if verbose else 0
@@ -238,10 +238,10 @@ def save_run(res_dict: dict, path: str=None):
 
 
 # run models
-res_dict_baseline = run_model(build_baseline, "Baseline", verbose)
+# res_dict_baseline = run_model(build_baseline, "Baseline", verbose)
 res_dict_interpolated = run_model(build_interpolated, "Interpolated", verbose)
 
 
 # save runs
-save_run(res_dict_baseline)
+# save_run(res_dict_baseline)
 save_run(res_dict_interpolated)
