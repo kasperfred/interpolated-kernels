@@ -19,23 +19,23 @@ run_version = 0
 
 # params
 batch_size = 128
-epochs = 12
+epochs = 6
 im_size = 28*4
 
 # kernel params
-kernel_size = 3  # effective
+kernel_size = 3*4  # effective
 kernel_positions = np.array([
     # h w
     [0, 0],
     [2, 0],
-    [1,1],
+    [1, 1],
     [0, 2],
     [2, 2]
 ])
 
 # computed:
 input_shape = (im_size, im_size, 1)
-run_name = f"run-i{im_size}-k{kernel_size}-v{run_version}"
+run_name = f"run-i{im_size}-k{kernel_size}-ki{len(kernel_positions)}-v{run_version}"
 
 
 def get_data(size=28, resize_method="cv2"):
@@ -75,7 +75,7 @@ def get_data(size=28, resize_method="cv2"):
     x_train = x_train.reshape(x_train.shape[0], size, size, 1)
     x_test = x_test.reshape(x_test.shape[0], size, size, 1)
 
-    # convert class vectors to binary class matrices
+    # onehot labels
     y_train = keras.utils.to_categorical(y_train, 10)
     y_test = keras.utils.to_categorical(y_test, 10)
 
