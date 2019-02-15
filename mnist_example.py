@@ -209,7 +209,6 @@ def run_model(model_build_function, name=None, verbose=True):
 
     return {
         "name": name,
-        "training_hist": hist,
         "training_time": t.delta,
         "test_loss": score[0],
         "test_accuracy": score[1]
