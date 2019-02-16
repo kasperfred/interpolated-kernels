@@ -104,7 +104,7 @@ class InterpolatedConv2d(tf.keras.layers.Layer):
     
     def extract_interpolated_kernel(self):
         """Returns the interpolated filters
-        akin to a normal conv2d network
+        akin to a normal conv2d kernels
         """
 
         full_kernel = _spline_interpolate_kernel_layer(self.kernel_positions,
