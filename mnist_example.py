@@ -240,22 +240,18 @@ def run_model(model_build_function, name=None, verbose=True):
 
     score = model.evaluate(x_test, y_test, verbose=0)
 
-    conv_layer_weight = model.layers[0].weights[0]
-
     if verbose:
         print(name)
         print('Test loss:', score[0])
         print('Test accuracy:', score[1])
         print('Time:', t.delta)
         print(model.summary())
-        print(conv_layer_weight)
 
     return {
         "name": name,
         "training_time": t.delta,
         "test_loss": score[0],
         "test_accuracy": score[1],
-        "conv_layer_weight": conv_layer_weight
     }
 
 
