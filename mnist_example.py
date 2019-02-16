@@ -30,21 +30,21 @@ kernel_size = 3*4  # effective
 kernel_positions = np.array([
     # h w
     [0, 0],
-    [0,11],
-    [0,8],
+    [0, 11],
+    [0, 8],
     [1, 5],
     [3, 2],
     [3, 9],
     [5, 0],
-    [5,4],
-    [5,11],
-    [6,7],
-    [8,2],
-    [8,9],
-    [10,5],
-    [11,0],
-    [11,8],
-    [11,11]
+    [5, 4],
+    [5, 11],
+    [6, 7],
+    [8, 2],
+    [8, 9],
+    [10, 5],
+    [11, 0],
+    [11, 8],
+    [11, 11]
 ])
 
 # computed:
@@ -60,7 +60,7 @@ def get_data(size=28, resize_method="cv2"):
 
     x_train = x_train / 255
     x_test = x_test / 255
-    
+
     if not size == 28:
         if resize_method == "tf":
             x_train = tf.image.resize_images(
@@ -76,15 +76,14 @@ def get_data(size=28, resize_method="cv2"):
             )
         elif resize_method == "cv2":
             x_train = np.array([
-                cv2.resize(x, (size,size))
+                cv2.resize(x, (size, size))
                 for x in x_train])
-            
-            x_test = np.array([
-                cv2.resize(x, (size,size))
-                for x in x_test])
-        else: 
-            raise ValueError("Invalid resize method. Use 'cv2' or 'tf'.")
 
+            x_test = np.array([
+                cv2.resize(x, (size, size))
+                for x in x_test])
+        else:
+            raise ValueError("Invalid resize method. Use 'cv2' or 'tf'.")
 
     x_train = x_train.reshape(x_train.shape[0], size, size, 1)
     x_test = x_test.reshape(x_test.shape[0], size, size, 1)
@@ -95,8 +94,6 @@ def get_data(size=28, resize_method="cv2"):
 
     return (x_train, y_train), (x_test, y_test)
 
-
-(x_train, y_train), (x_test, y_test) = get_data(im_size)
 
 def datagen(batch_size, x, y, method="cycle"):
     if method == "random":
@@ -121,13 +118,8 @@ def datagen(batch_size, x, y, method="cycle"):
     else:
         raise ValueError("Method is not supported. Use 'random' or 'cycle'.")
 
-if verbose:
-    print('x_train shape:', x_train.shape)
-    print(x_train.shape[0], 'train samples')
-    print(x_test.shape[0], 'test samples')
 
-
-def build_baseline(input_shape, kernel_size, compile=True, *args, **kwargs):
+def build_baseline(input_shape, kernel_size, compile=True, *args, **kwargs) -> keras.Model:
     model = Sequential()
     model.add(Conv2D(32, kernel_size=(kernel_size, kernel_size),
                      activation='linear',
@@ -152,7 +144,8 @@ def build_baseline(input_shape, kernel_size, compile=True, *args, **kwargs):
 
     return model
 
-def build_dilated(input_shape, kernel_size, compile=True, *args, **kwargs):
+
+def build_dilated(input_shape, kernel_size, compile=True, *args, **kwargs) -> keras.Model:
     model = Sequential()
     model.add(Conv2D(32, kernel_size=(kernel_size, kernel_size),
                      activation='linear',
@@ -179,7 +172,7 @@ def build_dilated(input_shape, kernel_size, compile=True, *args, **kwargs):
     return model
 
 
-def build_interpolated(input_shape, kernel_size, kernel_positions, compile=True, *args, **kwargs):
+def build_interpolated(input_shape, kernel_size, kernel_positions, compile=True, *args, **kwargs) -> keras.Model:
     model = Sequential()
 
     kcs = symmetric_filters(kernel_positions, 32)
@@ -226,16 +219,16 @@ def run_model(model_build_function, name=None, verbose=True):
 
     # run model
     model = model_build_function(input_shape, kernel_size=kernel_size,
-                           kernel_positions=kernel_positions, compile=True)
+                                 kernel_positions=kernel_positions, compile=True)
 
     verbose_fixed = 1 if verbose else 0
 
     t = Timer().start()
     hist = model.fit(x_train, y_train,
-                    batch_size=batch_size,
-                    epochs=epochs,
-                    verbose=verbose_fixed,
-                    validation_data=(x_test, y_test))
+                     batch_size=batch_size,
+                     epochs=epochs,
+                     verbose=verbose_fixed,
+                     validation_data=(x_test, y_test))
     t.stop()
 
     score = model.evaluate(x_test, y_test, verbose=0)
@@ -259,14 +252,13 @@ def save_run(res_dict: dict, path: str=None):
     if not path:
         fname = res_dict["name"] + ".res.pkl"
 
-        directory = os.path.join("results",run_name)
+        directory = os.path.join("results", run_name)
 
         # create directories
         if not os.path.exists(directory):
             os.makedirs(directory)
 
         path = os.path.join(directory, fname)
-    
 
     # save data
     with open(path, 'wb') as f:
@@ -275,16 +267,20 @@ def save_run(res_dict: dict, path: str=None):
     return 0
 
 
+if __name__ == "__main__":
+    (x_train, y_train), (x_test, y_test) = get_data(im_size)
+    if verbose:
+        print('x_train shape:', x_train.shape)
+        print(x_train.shape[0], 'train samples')
+        print(x_test.shape[0], 'test samples')
 
+    # run models
+    res_dict_baseline = run_model(build_baseline, "Baseline", verbose)
+    res_dict_interpolated = run_model(
+        build_interpolated, "Interpolated", verbose)
+    # res_dict_dilated = run_model(build_dilated, "Dilated", verbose)
 
-# run models
-res_dict_baseline = run_model(build_baseline, "Baseline", verbose)
-res_dict_interpolated = run_model(build_interpolated, "Interpolated", verbose)
-# res_dict_dilated = run_model(build_dilated, "Dilated", verbose)
-
-
-
-# save runs
-save_run(res_dict_baseline)
-save_run(res_dict_interpolated)
-# save_run(res_dict_dilated)
+    # save runs
+    save_run(res_dict_baseline)
+    save_run(res_dict_interpolated)
+    # save_run(res_dict_dilated)
