@@ -101,3 +101,19 @@ class InterpolatedConv2d(tf.keras.layers.Layer):
                          padding=self.padding)
 
         return v
+    
+    def extract_interpolated_kernel(self):
+        """Returns the interpolated filters
+        akin to a normal conv2d network
+        """
+
+        full_kernel = _spline_interpolate_kernel_layer(self.kernel_positions,
+                                                       self.kernel_var,
+                                                       kernel_size=self.kernel_size,
+                                                       channels=self.channels,
+                                                       cont3d=self.cont3d)
+
+        shape = [full_kernel.shape[1], full_kernel.shape[2],
+                 full_kernel.shape[3], full_kernel.shape[0]]
+        kernel = tf.reshape(full_kernel, shape)
+        return kernel
