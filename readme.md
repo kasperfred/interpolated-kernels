@@ -9,7 +9,7 @@ It achieves this by using sparse kernels similar to [dilated kernels by Y Li et.
 
 The remaining positions are then interpolated using an interpolation strategy which adds a relatively small amount of extra computation during the forward propagation phase which is offset by heavily reducing the number of parameters required to optimize during backpropagation. 
 
-TK: explanitory image.
+![explanitory image](./imgs/explanitory_image.PNG)
 
 This method is desirable over dilated kernels whenever 
 1. You require dense kernels. 
