@@ -275,12 +275,12 @@ if __name__ == "__main__":
         print(x_test.shape[0], 'test samples')
 
     # run models
-    res_dict_baseline = run_model(build_baseline, "Baseline", verbose)
+    # res_dict_baseline = run_model(build_baseline, "Baseline", verbose)
     res_dict_interpolated = run_model(
         build_interpolated, "Interpolated", verbose)
     # res_dict_dilated = run_model(build_dilated, "Dilated", verbose)
 
     # save runs
-    save_run(res_dict_baseline)
+    # save_run(res_dict_baseline)
     save_run(res_dict_interpolated)
     # save_run(res_dict_dilated)
