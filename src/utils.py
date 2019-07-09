@@ -16,19 +16,28 @@ def dilated_interpolated_filters(kernel_size: int, dilation_rate:int) -> List:
     Returns:
         List: kernel positions
     """
-
-    # dilation rate is like horizontal and vertical skip
-
-    # 0,0
-    # 1*dilation_rate, 0
-    # kernel_size*dilation_rate, 0
-    res = []
+    kernel_positions = []
     for h in range(kernel_size):
         for w in range(kernel_size):
             q = [h*dilation_rate,w*dilation_rate]
-            res.append(q)
-    return res
+            kernel_positions.append(q)
+    return kernel_positions
 
+
+def auto_filter_positions(kernel_size:int, spacing:int) -> List:
+    kernel_positions = []
+
+    crow = 0
+    ccol = 0
+    while crow < kernel_size:
+        while ccol < kernel_size:
+            q = [crow, ccol]
+            kernel_positions.append(q)
+            ccol+=spacing
+        crow+=spacing
+        ccol=0
+
+    return kernel_positions
 
 
 def required_kernel_size(kernel_positions:List) -> int:
@@ -43,3 +52,20 @@ def required_kernel_size(kernel_positions:List) -> int:
     
     return max_x if max_x > max_y else max_y
 
+
+
+
+if __name__ == "__main__":
+    kernel_size = 5
+    spacing = 2
+
+
+    kernel_positions = auto_filter_positions(kernel_size,spacing)
+    print (kernel_positions)
+
+    import matplotlib.pyplot as plt
+
+    for q in kernel_positions:
+        plt.scatter(q[0],q[1])
+    
+    plt.show()
