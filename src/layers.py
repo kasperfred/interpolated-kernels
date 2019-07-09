@@ -1,4 +1,5 @@
 import tensorflow as tf
+import numpy as np
 
 
 def _spline_interpolate_kernel_layer(kernel_positions, kernel_values, kernel_size, channels, order=1, cont3d=False):
@@ -16,6 +17,7 @@ def _spline_interpolate_kernel_layer(kernel_positions, kernel_values, kernel_siz
     # float32 because the spline is continous
     kernel_positions = tf.convert_to_tensor(kernel_positions, dtype=tf.float32)
 
+
     if kernel_positions.shape[2] == 3 and channels == 1:
         raise ValueError("You should omit the channels dimension from your kernel positions if you only have 1 channel.")
 
@@ -28,6 +30,7 @@ def _spline_interpolate_kernel_layer(kernel_positions, kernel_values, kernel_siz
     else:
         query_points_raw = tf.convert_to_tensor([[[x, y] for x in range(
             kernel_size) for y in range(kernel_size)] for _ in range(n_filters)], dtype=tf.float32)
+
 
     query_points = tf.reshape(
         query_points_raw,   [n_filters, -1, query_points_raw.shape[2]])
@@ -51,7 +54,7 @@ class InterpolatedConv2d(tf.keras.layers.Layer):
                  kernel_positions,
                  kernel_size,
                  strides=(1, 1, 1, 1),
-                 padding="SAME",
+                 padding="VALID",
                  order=1,
                  continous_3d=True,
                  **kwargs):
@@ -87,12 +90,16 @@ class InterpolatedConv2d(tf.keras.layers.Layer):
         full_kernel = _spline_interpolate_kernel_layer(self.kernel_positions,
                                                        self.kernel_var,
                                                        kernel_size=self.kernel_size,
-                                                       channels=self.channels,
+                                                       channels=1,#self.channels, #the method doesn't seem to like to interpolate in 3d.
                                                        cont3d=self.cont3d)
 
         shape = [full_kernel.shape[1], full_kernel.shape[2],
                  full_kernel.shape[3], full_kernel.shape[0]]
         kernel = tf.reshape(full_kernel, shape)
+
+        # tile accross dimensions to make sure input dimension makes sense
+        kernel = tf.tile(kernel, [1, 1, self.channels, 1])
+ 
 
         # use tf built in conv2d method for speed
         v = tf.nn.conv2d(input,
@@ -117,3 +124,30 @@ class InterpolatedConv2d(tf.keras.layers.Layer):
                  full_kernel.shape[3], full_kernel.shape[0]]
         kernel = tf.reshape(full_kernel, shape)
         return kernel
+
+
+if __name__ == "__main__":
+    kernel_positions =  np.array([
+                                [0,0],
+                                [2,2],
+                                [2,0],
+                                [0,2]])
+
+    kernel_values = np.array([
+        1,
+        1,
+        1,
+        1
+    ],dtype="float32")
+
+    kernel_positions = kernel_positions.reshape([1,-1,2])
+    kernel_values = kernel_values.reshape([1,4,1])
+
+    print (kernel_positions.shape)
+    print (kernel_values.shape)
+
+    print (_spline_interpolate_kernel_layer(kernel_positions,
+                                            kernel_values,
+                                            kernel_size=3,
+                                            channels=1,
+                                            cont3d=True))
