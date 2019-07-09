@@ -1,4 +1,4 @@
-from src.utils import symmetric_filters
+from src.utils import symmetric_filters, auto_filter_positions
 from src.layers import InterpolatedConv2d
 import tensorflow.keras as keras
 from tensorflow.keras.datasets import mnist
@@ -18,7 +18,7 @@ verbose = True
 run_version = 0
 
 # disable GPU due to cuda handler not being able to register
-# os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
 # params
 batch_size = 128
@@ -27,29 +27,11 @@ im_size = 28*4
 
 # kernel params
 kernel_size = 3*4  # effective
-kernel_positions = np.array([
-    # h w
-    [0, 0],
-    [0, 11],
-    [0, 8],
-    [1, 5],
-    [3, 2],
-    [3, 9],
-    [5, 0],
-    [5, 4],
-    [5, 11],
-    [6, 7],
-    [8, 2],
-    [8, 9],
-    [10, 5],
-    [11, 0],
-    [11, 8],
-    [11, 11]
-])
+spacing = 2
 
 # computed:
 input_shape = (im_size, im_size, 1)
-run_name = f"run-i{im_size}-k{kernel_size}-ki{len(kernel_positions)}-v{run_version}"
+run_name = f"run-i{im_size}-k{kernel_size}-ks{spacing}-v{run_version}"
 
 
 def get_data(size=28, resize_method="cv2"):
@@ -127,8 +109,8 @@ def build_baseline(input_shape, kernel_size, compile=True, *args, **kwargs) -> k
                      input_shape=input_shape))
     model.add(tf.keras.layers.Lambda(lambda x: tf.nn.relu(x)))
 
-    # model.add(Conv2D(64, (3, 3), activation='linear', use_bias=None))
-    # model.add(tf.keras.layers.Lambda(lambda x: tf.nn.relu(x)))
+    model.add(Conv2D(64, (3, 3), activation='linear', use_bias=None))
+    model.add(tf.keras.layers.Lambda(lambda x: tf.nn.relu(x)))
 
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Dropout(0.25))
@@ -154,8 +136,8 @@ def build_dilated(input_shape, kernel_size, compile=True, *args, **kwargs) -> ke
                      input_shape=input_shape))
     model.add(tf.keras.layers.Lambda(lambda x: tf.nn.relu(x)))
 
-    # model.add(Conv2D(64, (3, 3), activation='linear', use_bias=None))
-    # model.add(tf.keras.layers.Lambda(lambda x: tf.nn.relu(x)))
+    model.add(Conv2D(64, (3, 3), activation='linear', use_bias=None, dilation_rate=(2,2)))
+    model.add(tf.keras.layers.Lambda(lambda x: tf.nn.relu(x)))
 
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Dropout(0.25))
@@ -172,17 +154,16 @@ def build_dilated(input_shape, kernel_size, compile=True, *args, **kwargs) -> ke
     return model
 
 
-def build_interpolated(input_shape, kernel_size, kernel_positions, compile=True, *args, **kwargs) -> keras.Model:
+def build_interpolated(input_shape, kernel_size, spacing, compile=True, *args, **kwargs) -> keras.Model:
     model = Sequential()
 
-    kcs = symmetric_filters(kernel_positions, 32)
+    kcs = symmetric_filters(auto_filter_positions(kernel_size, spacing), 32)
     model.add(InterpolatedConv2d(kcs, kernel_size, input_shape=input_shape))
-
     model.add(tf.keras.layers.Lambda(lambda x: tf.nn.relu(x)))
 
-    # kcs = symmetric_filters(kernel_positions, 64)
-    # model.add(InterpolatedConv2d(kcs,3))
-    # model.add(tf.keras.layers.Lambda(lambda x: tf.nn.relu(x)))
+    kcs = symmetric_filters(auto_filter_positions(kernel_size, spacing), 64)
+    model.add(InterpolatedConv2d(kcs,3))
+    model.add(tf.keras.layers.Lambda(lambda x: tf.nn.relu(x)))
 
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Dropout(0.25))
@@ -218,8 +199,7 @@ def run_model(model_build_function, name=None, verbose=True):
         name = model_build_function.__str__()
 
     # run model
-    model = model_build_function(input_shape, kernel_size=kernel_size,
-                                 kernel_positions=kernel_positions, compile=True)
+    model = model_build_function(input_shape, kernel_size=kernel_size, spacing=spacing, compile=True)
 
     verbose_fixed = 1 if verbose else 0
 
@@ -252,7 +232,7 @@ def save_run(res_dict: dict, path: str=None):
     if not path:
         fname = res_dict["name"] + ".res.pkl"
 
-        directory = os.path.join("results", run_name)
+        directory = os.path.join("model_data", run_name)
 
         # create directories
         if not os.path.exists(directory):
@@ -276,11 +256,10 @@ if __name__ == "__main__":
 
     # run models
     # res_dict_baseline = run_model(build_baseline, "Baseline", verbose)
-    res_dict_interpolated = run_model(
-        build_interpolated, "Interpolated", verbose)
+    res_dict_interpolated = run_model(build_interpolated, "Interpolated", verbose)
     # res_dict_dilated = run_model(build_dilated, "Dilated", verbose)
 
     # save runs
     # save_run(res_dict_baseline)
-    save_run(res_dict_interpolated)
+    # save_run(res_dict_interpolated)
     # save_run(res_dict_dilated)
